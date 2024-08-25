@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import wcaSecrets from '../../../wcaauth.json'
+//import wcaSecrets from '../../../wcaauth.json'
 
 @Component({
   selector: 'app-user-registration',
@@ -33,11 +33,15 @@ export class UserRegistrationComponent {
   }
 
   requestToken(): void {
+    // let cid = wcaSecrets.client_id;
+    // let sec = wcaSecrets.secret;
+    let cid = "OS6jVGAcxX_MwpLawxS1hRq8IVNEfu-FAthO72ARdyw";
+    let sec = "OP_J3qaVdOVL0I5vTwzKwRsyY2EVq9xZRKM9KsofN1I";
     let api_params = {
       grant_type:'authorization_code',
       code:this.api_code,
-      client_id:wcaSecrets.client_id,
-      client_secret:wcaSecrets.secret,
+      client_id:cid,
+      client_secret:sec,
       redirect_uri:window.location.origin + window.location.pathname
     }
     console.log(api_params);

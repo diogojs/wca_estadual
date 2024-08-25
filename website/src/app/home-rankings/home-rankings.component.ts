@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { CubingEvent, PersonResult, Result } from '../data';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 //import dataJson from '../data.json';
 
 @Component({
   selector: 'app-home-rankings',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './home-rankings.component.html',
   styleUrl: './home-rankings.component.scss'
 })

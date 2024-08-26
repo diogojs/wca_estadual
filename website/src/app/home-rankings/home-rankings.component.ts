@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { CubingEvent, PersonResult, Result } from '../data';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthenticationService } from '../services/authentication.service';
 //import dataJson from '../data.json';
 
 @Component({
@@ -19,10 +20,16 @@ export class HomeRankingsComponent implements OnInit {
   currentState: string = "";
   currentKindOfResult: string = "single";
 
-  constructor() {}
+  constructor(private authService: AuthenticationService) {}
 
   ngOnInit(): void {
     // this.results = dataJson;
+    if (sessionStorage.getItem("is_getting_token") !== null) {
+      console.log("entrou aqui");
+      sessionStorage.removeItem("is_getting_token");
+      this.authService.requestToken();
+    }
+
     this.results = {
       "333":
       [
@@ -165,5 +172,14 @@ export class HomeRankingsComponent implements OnInit {
   changeKindTo(kind: string): void {
     this.currentKindOfResult = kind;
     this.updateFilteredResults();
+  }
+
+  login(): void {
+    if (this.authService.isLogged()) {
+      return;
+    }
+    else {
+      this.authService.login();
+    }
   }
 }

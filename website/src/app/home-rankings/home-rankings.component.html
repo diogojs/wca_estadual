@@ -1,5 +1,6 @@
 <p>Home Rankings</p>
-<button (click)="login()">Login</button>
+<button (click)="login()" *ngIf="!isLogged()">Login</button>
+<p *ngIf="isLogged()">Logado como: {{ getCurrentWcaId() }}</p>
 <section class="cubingEvents">
     <div>Modalidade</div>
     <button (click)="changeEventTo('333')">333</button>

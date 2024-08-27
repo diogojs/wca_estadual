@@ -25,7 +25,6 @@ export class HomeRankingsComponent implements OnInit {
   ngOnInit(): void {
     // this.results = dataJson;
     if (sessionStorage.getItem("is_getting_token") !== null) {
-      console.log("entrou aqui");
       sessionStorage.removeItem("is_getting_token");
       this.authService.requestToken();
     }
@@ -181,5 +180,13 @@ export class HomeRankingsComponent implements OnInit {
     else {
       this.authService.login();
     }
+  }
+
+  isLogged(): boolean {
+    return this.authService.isLogged();
+  }
+
+  getCurrentWcaId(): string {
+    return sessionStorage.getItem("wca_id")!;
   }
 }

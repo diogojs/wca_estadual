@@ -20,15 +20,10 @@ export class HomeRankingsComponent implements OnInit {
   currentState: string = "";
   currentKindOfResult: string = "single";
 
-  constructor(private authService: AuthenticationService) {}
+  constructor() {}
 
   ngOnInit(): void {
     // this.results = dataJson;
-    if (sessionStorage.getItem("is_getting_token") !== null) {
-      sessionStorage.removeItem("is_getting_token");
-      this.authService.requestToken();
-    }
-
     this.results = {
       "333":
       [
@@ -171,22 +166,5 @@ export class HomeRankingsComponent implements OnInit {
   changeKindTo(kind: string): void {
     this.currentKindOfResult = kind;
     this.updateFilteredResults();
-  }
-
-  login(): void {
-    if (this.authService.isLogged()) {
-      return;
-    }
-    else {
-      this.authService.login();
-    }
-  }
-
-  isLogged(): boolean {
-    return this.authService.isLogged();
-  }
-
-  getCurrentWcaId(): string {
-    return sessionStorage.getItem("wca_id")!;
   }
 }

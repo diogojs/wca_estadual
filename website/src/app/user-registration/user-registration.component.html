@@ -1,1 +1,13 @@
-<p>user-registration works!</p>
+<section *ngIf="!isLogged()">
+    <p>Você precisa logar na WCA para poder se cadastrar no Ranking.</p>
+    <button (click)="login()">Login</button>
+</section>
+
+<section class="cadastro" *ngIf="isLogged()">
+    <p>Logado como: {{ getCurrentWcaId() }}</p>
+    <div>
+        form<br>
+        dropdown com os estados<br>
+        <button>Cadastrar</button><br>
+    </div>
+</section>

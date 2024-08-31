@@ -7,12 +7,10 @@ export interface Result {
 
 export interface PersonResult {
     id: string;
-    name: string;
-    single: number;
-    average: number;
-    state: string;
-    competitionSingle: string;
-    competitionAverage: string;
+    single: number | undefined;
+    average: number | undefined;
+    // competitionSingle: string;
+    // competitionAverage: string;
 }
 
 export enum CubingEvent {

@@ -1,7 +1,9 @@
 from markupsafe import escape
 from datetime import datetime
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
+
+from constants import STATES
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
@@ -9,6 +11,7 @@ db = SQLAlchemy(app)
 
 OK_CODE = 42
 USER_CREATED = 10
+USER_NOT_CREATED = 11
 USER_UPDATED = 20
 USER_NOT_UPDATED = 21
 USER_NOT_FOUND = 30
@@ -51,10 +54,20 @@ def get_user_by_id(wca_id):
 def create_user(wca_id):
     data = request.get_json()
 
-    wca_id=escape(wca_id)
     state=escape(data['state'])
     # check wca_id do not exist yet
+    if UserModel.query.filter_by(wca_id=wca_id).first() is not None:
+        return {
+            'code': USER_NOT_CREATED,
+            'message': f'User {wca_id} already exists.'
+        }
     # check state is valid
+    if state not in STATES:
+        return {
+            'code': USER_NOT_CREATED,
+            'message': f'State {state} not valid.'
+        }
+
     today = datetime.now().date()
     new_user = UserModel(wca_id=wca_id, state=state, last_updated=today)
     db.session.add(new_user)

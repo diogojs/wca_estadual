@@ -6,6 +6,7 @@ import sqlite3
 import time
 import os
 
+from constants import KINDS, EVENTS
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +17,6 @@ PERSON_ENDPOINT = 'persons/'
 DATABASE_FILE = "instance/database.db"
 JSON_FILE = "data.json"
 database_last_updated = 1
-
-KINDS = ('single', 'average')
-EVENTS = ("222", "333bf", "333", "333fm", "333mbf", "333oh", "333ft", "444bf", "444", "555bf", "555", "666", "777", "clock", "minx", "pyram", "skewb", "sq1")
 
 
 def get_results(kind: str, event: str, page = 1):
@@ -119,15 +117,11 @@ kind: 'single', 'average'
 result = [
     {
         "id": "2012SATO03",
-        "name": "Caio Hideaki Sato",
         "single": 437,
-        "state": "SP"
     },
     {
         "id": "2014CECC01",
-        "name": "Vicenzo Guerino Cecchini",
         "single": 486,
-        "state": "SP"
     },
     ...
 ]
@@ -139,9 +133,7 @@ def get_ranking_for_event(event: str, kind: str):
             if ev['eventId'] == event:
                 filtered_competitors.append({
                     'id': p['id'],
-                    'name': p['name'],
                     kind: ev['best'],
-                    'state': p['state']
                 })
                 break
 
@@ -179,58 +171,23 @@ def generate_data_json():
     competitors = get_competitors()
 
     logger.info('Getting rankings for events.')
+    data = {
+        'competitors': {
+            c['id']: {'name': c['name'], 'state': c['state']} for c in competitors
+        }
+    }
     result = {}
     for kind in KINDS:
         result[kind] = {}
         for event in EVENTS:
             result[kind][event] = get_ranking_for_event(event, kind)
-
-    """ example
-    result = {
-        'single': {
-            '333': [
-                {
-                    "id": "2012SATO03",
-                    "name": "Caio Hideaki Sato",
-                    "single":	4.37,
-                    "state": "SP"
-                },
-                {
-                    "id": "2014CECC01",
-                    "name": "Vicenzo Guerino Cecchini",
-                    "single":	4.86,
-                    "state": "SP"
-                },
-                ...
-            ],
-            '444': [
-                {
-                    "id": "2012SATO03",
-                    "name": "Caio Hideaki Sato",
-                    "single":	4.37,
-                    "state": "SP"
-                }, ...
-            ]
-        },
-        'average': {
-            '333': [
-                {
-                    "id": "2012SATO03",
-                    "name": "Caio Hideaki Sato",
-                    "single":	4.37,
-                    "state": "SP"
-                },
-                ...
-            ]
-        }
-    }
-    """
+    data['result'] = result
 
     # generate data.json
     with open(JSON_FILE, "w") as outfile:
-        json.dump(result, outfile)
+        json.dump(data, outfile)
     
-    # send updated file to github
+    # TODO: send updated file to github
 
 
 def sleepUntilTomorrow(hour, minute):
@@ -266,7 +223,7 @@ def main():
         except Exception as e:
             logger.error('Error generating data json: ')
             logger.error(e.with_traceback())
-        sleepUntilTomorrow(4, 0)
+        sleepUntilTomorrow(16, 55)
 
 
 if __name__ == "__main__":

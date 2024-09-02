@@ -4,10 +4,12 @@
 </section>
 
 <section class="cadastro" *ngIf="isLogged()">
-    <p>Logado como: {{ getCurrentWcaId() }}</p>
-    <div>
-        form<br>
-        dropdown com os estados<br>
-        <button>Cadastrar</button><br>
-    </div>
+    <form [formGroup]="dropDownForm">
+        <label>WCA ID: {{ getCurrentWcaId() }}</label>
+        <select formControlName="stateForm">
+            <option selected></option>
+            <option *ngFor="let state of states" [value]="state.abbrev">{{ state.name }}</option>
+        </select>
+        <button (click)="submit()">{{ userData ? 'Atualizar' : 'Cadastrar' }}</button><br>
+    </form>
 </section>

@@ -27,7 +27,7 @@ export class HomeRankingsComponent implements OnInit {
     this.resultsService.getResults().subscribe(
       (response: JSON) => {
         this.results = response;
-        console.log(response)
+        this.updateFilteredResults();
       }
     )
 

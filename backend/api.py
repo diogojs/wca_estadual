@@ -1,11 +1,14 @@
+import json
 import logging
 import requests
+from os import environ
 
 from markupsafe import escape
 from datetime import datetime
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
+from werkzeug import exceptions
 
 from constants import STATES
 
@@ -14,6 +17,10 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 db = SQLAlchemy(app)
 CORS(app)
+
+CLIENT_ID = environ.get('API_CLIENT_ID')
+CLIENT_SECRET = environ.get('API_CLIENT_SECRET')
+DATA_FILE = 'data.json'
 
 OK_CODE = 42
 USER_CREATED = 10
@@ -32,8 +39,6 @@ class UserModel(db.Model):
     def __repr__(self):
         return f"User(wca_id={self.wca_id}, state={self.state})"
 
-def get_event_results(event: str):
-    return ''
 
 @app.route('/')
 def home():
@@ -64,6 +69,9 @@ def get_wca_id_from_token(access_token: str) -> str:
         'Content-Type': 'application/json'
     }
     response = requests.get(wca_user_url, headers=headers)
+    if response.status_code != 200:
+        return ''
+
     j = response.json()
     user = j.get('me')
     if user:
@@ -75,8 +83,10 @@ def get_wca_id_from_token(access_token: str) -> str:
 def create_user(wca_id):
     data = request.get_json()
 
-    state=escape(data['state'])
-    access_token = escape(data['access_token'])
+    state = get_escaped(data, 'state')
+    access_token = get_escaped(data, 'access_token')
+    if state is None or access_token is None:
+        return exceptions.BadRequest
 
     user_wca_id = get_wca_id_from_token(access_token)
     if wca_id != user_wca_id:
@@ -112,10 +122,12 @@ def create_user(wca_id):
 
 @app.put('/user/<wca_id>')
 def update_user(wca_id):
-    logger.info("put")
     data = request.get_json()
-    state=escape(data['state'])
-    access_token = escape(data['access_token'])
+
+    state = get_escaped(data, 'state')
+    access_token = get_escaped(data, 'access_token')
+    if state is None or access_token is None:
+        return exceptions.BadRequest
 
     user_wca_id = get_wca_id_from_token(access_token)
     if wca_id != user_wca_id:
@@ -130,7 +142,7 @@ def update_user(wca_id):
     if not user:
         return {
             'code': USER_NOT_FOUND,
-            'message': f'No user found with id {escape(user_wca_id)}'
+            'message': f'No user found with id {user_wca_id}'
             }
 
     today = datetime.now().date()
@@ -156,45 +168,48 @@ def update_user(wca_id):
 def get_token(code):
     data = request.get_json()
 
-    # post to 
-    cid = "OS6jVGAcxX_MwpLawxS1hRq8IVNEfu-FAthO72ARdyw"
-    sec = "OP_J3qaVdOVL0I5vTwzKwRsyY2EVq9xZRKM9KsofN1I"
-    api_params = {
-      'grant_type':'authorization_code',
-      'code':code,
-      'client_id':cid,
-      'client_secret':sec,
-      'redirect_uri': escape(data['redirect_uri'])
-    }
+    redirect_uri = get_escaped(data, 'redirect_uri')
 
+    api_params = {
+      'grant_type': 'authorization_code',
+      'code': code,
+      'client_id': CLIENT_ID,
+      'client_secret': CLIENT_SECRET,
+      'redirect_uri': redirect_uri
+    }
     wca_token_url = 'https://www.worldcubeassociation.org/oauth/token/'
     response = requests.post(wca_token_url, api_params)
     
     if response.status_code != 200:
         logger.error(f'Error trying to get token from WCA.\nStatus: {response.status_code}\nHeaders: {response.headers}\nContent: {response.content}')
-        return
+        return response.status_code
     
     j = response.json()
-    access_token = j['access_token']
-    logger.info(f'Got token {access_token}')
+    access_token = j.get('access_token')
 
     return {
         'access_token': access_token,
     }
 
-@app.route('/e333', methods=['GET'])
-def get_3x3():
-    return get_event_results('333')
+@app.get('/ranking')
+def get_ranking_file():
+    with open(DATA_FILE, 'r') as jfile:
+        data = json.load(jfile)
 
-@app.route('/e444', methods=['GET'])
-def get_4x4():
-    return get_event_results('444')
+    return data
 
-@app.route('/e555', methods=['GET'])
-def get_5x5():
-    return get_event_results('555')
+
+def get_escaped(data: dict, field: str):
+    value = data.get(field)
+    if value:
+        return escape(value)
+    return None
 
 
 if __name__ == "__main__":
     logging.basicConfig(filename='api.log', level=logging.INFO)
+
+    if CLIENT_ID is None or CLIENT_SECRET is None:
+        print('API_CLIENT_ID and API_CLIENT_SECRET must be set through environment variables.')
+        exit(1)
     app.run(debug=True)

@@ -187,8 +187,6 @@ def generate_data_json():
     with open(JSON_FILE, "w") as outfile:
         json.dump(data, outfile)
     
-    # TODO: send updated file to github
-
 
 def sleepUntilTomorrow(hour, minute):
     t = datetime.datetime.today()

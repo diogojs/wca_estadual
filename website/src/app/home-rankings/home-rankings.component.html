@@ -2,19 +2,12 @@
 <p><a routerLink="register" routerLinkActive="true">Cadastrar competidor</a></p>
 <section class="cubingEvents">
     <div>Modalidade</div>
-    <button (click)="changeEventTo('222')">222</button>
-    <button (click)="changeEventTo('333')">333</button>
-    <button (click)="changeEventTo('444')">444</button>
-    <button (click)="changeEventTo('555')">555</button>
-    <button (click)="changeEventTo('666')">666</button>
-    <button (click)="changeEventTo('777')">777</button>
-    <button (click)="changeEventTo('minx')">minx</button>
+    <button *ngFor="let evt of events" (click)="changeEventTo(evt)">{{ evt }}</button>
 </section>
 <section class="states">
     <div>Estado</div>
-    <button (click)="changeStateTo('PR')">PR</button>
-    <button (click)="changeStateTo('SC')">SC</button>
-    <button (click)="changeStateTo('SP')">SP</button>
+    <button (click)="changeStateTo('')">Todos</button>
+    <button *ngFor="let st of states" (click)="changeStateTo(st.abbrev)">{{ st.abbrev }}</button>
 </section>
 <section class="kindOfResult">
     <div>Tipo</div>
@@ -40,7 +33,7 @@
             <tr *ngFor="let result of filteredResults; index as idx">
                 <td>{{ idx + 1 }}</td>
                 <td>{{ result.name }}</td>
-                <td>{{ result.result }}</td>
+                <td>{{ viewResult(result.result) }}</td>
                 <td>{{ result.state }}</td>
                 <td>{{ result.competition }}</td>
             </tr>

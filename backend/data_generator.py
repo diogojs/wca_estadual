@@ -181,7 +181,7 @@ def generate_data_json():
         result[kind] = {}
         for event in EVENTS:
             result[kind][event] = get_ranking_for_event(event, kind)
-    data['result'] = result
+    data['results'] = result
 
     # generate data.json
     with open(JSON_FILE, "w") as outfile:
@@ -207,6 +207,7 @@ def inner_database_is_updated() -> bool:
 
 
 def main():
+    time.sleep(30) # wait some time for database to be created
     last_weekly_update = datetime.datetime.today()
     while True:
         try:

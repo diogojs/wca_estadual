@@ -5,14 +5,16 @@ from os import environ
 
 from markupsafe import escape
 from datetime import datetime
-from flask import Flask, request
+from flask import Flask, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
+from sqlalchemy_utils import database_exists
 from werkzeug import exceptions
 
 from constants import STATES
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(filename='api.log', level=logging.INFO)
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 db = SQLAlchemy(app)
@@ -28,6 +30,15 @@ USER_NOT_CREATED = 11
 USER_UPDATED = 20
 USER_NOT_UPDATED = 21
 USER_NOT_FOUND = 30
+
+if CLIENT_ID is None or CLIENT_SECRET is None:
+    print('API_CLIENT_ID and API_CLIENT_SECRET must be set through environment variables.')
+    exit(1)
+
+if not database_exists("sqlite:///instance/database.db"):
+    logger.info("Creating database.")
+    with app.app_context():
+        db.create_all()
 
 
 class UserModel(db.Model):
@@ -61,24 +72,6 @@ def get_user_by_id(wca_id):
     }
     return {'code': OK_CODE, 'user': user_data}
 
-def get_wca_id_from_token(access_token: str) -> str:
-    # get wca_id and name (/me) using token
-    wca_user_url = "https://www.worldcubeassociation.org/api/v0/me"
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-        'Content-Type': 'application/json'
-    }
-    response = requests.get(wca_user_url, headers=headers)
-    if response.status_code != 200:
-        return ''
-
-    j = response.json()
-    user = j.get('me')
-    if user:
-        return user['wca_id']
-    else:
-        return ''
-
 @app.post('/user/<wca_id>')
 def create_user(wca_id):
     data = request.get_json()
@@ -86,7 +79,7 @@ def create_user(wca_id):
     state = get_escaped(data, 'state')
     access_token = get_escaped(data, 'access_token')
     if state is None or access_token is None:
-        return exceptions.BadRequest
+        abort(exceptions.BadRequest)
 
     user_wca_id = get_wca_id_from_token(access_token)
     if wca_id != user_wca_id:
@@ -127,7 +120,7 @@ def update_user(wca_id):
     state = get_escaped(data, 'state')
     access_token = get_escaped(data, 'access_token')
     if state is None or access_token is None:
-        return exceptions.BadRequest
+        abort(exceptions.BadRequest)
 
     user_wca_id = get_wca_id_from_token(access_token)
     if wca_id != user_wca_id:
@@ -181,8 +174,9 @@ def get_token(code):
     response = requests.post(wca_token_url, api_params)
     
     if response.status_code != 200:
-        logger.error(f'Error trying to get token from WCA.\nStatus: {response.status_code}\nHeaders: {response.headers}\nContent: {response.content}')
-        return response.status_code
+        msg = f'Error trying to get token from WCA.\nStatus: {response.status_code}\nHeaders: {response.headers}\nContent: {response.content}'
+        logger.error(msg)
+        return "Error trying to get token from WCA.", response.status_code
     
     j = response.json()
     access_token = j.get('access_token')
@@ -198,6 +192,23 @@ def get_ranking_file():
 
     return data
 
+def get_wca_id_from_token(access_token: str) -> str:
+    # get wca_id and name (/me) using token
+    wca_user_url = "https://www.worldcubeassociation.org/api/v0/me"
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json'
+    }
+    response = requests.get(wca_user_url, headers=headers)
+    if response.status_code != 200:
+        return ''
+
+    j = response.json()
+    user = j.get('me')
+    if user:
+        return user['wca_id']
+    else:
+        return ''
 
 def get_escaped(data: dict, field: str):
     value = data.get(field)
@@ -207,9 +218,4 @@ def get_escaped(data: dict, field: str):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='api.log', level=logging.INFO)
-
-    if CLIENT_ID is None or CLIENT_SECRET is None:
-        print('API_CLIENT_ID and API_CLIENT_SECRET must be set through environment variables.')
-        exit(1)
     app.run(debug=True)

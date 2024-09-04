@@ -13,6 +13,10 @@ COPY . .
 
 # Expose the server port
 EXPOSE 8080
+ENV API_CLIENT_ID=wca_client_id
+ENV API_CLIENT_SECRET=wca_client_secret
+
+RUN python create_db.py
 
 # Command to start the server
 CMD python data_generator.py & gunicorn -b 0.0.0.0:8080 api:app

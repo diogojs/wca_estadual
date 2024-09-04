@@ -5,11 +5,9 @@ from os import environ
 
 from markupsafe import escape
 from datetime import datetime
-from flask import Flask, request, abort
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
-from sqlalchemy_utils import database_exists
-from werkzeug import exceptions
 
 from constants import STATES
 
@@ -22,6 +20,7 @@ CORS(app)
 
 CLIENT_ID = environ.get('API_CLIENT_ID')
 CLIENT_SECRET = environ.get('API_CLIENT_SECRET')
+ADM_TOKEN = environ.get('API_ADM_TOKEN')
 DATA_FILE = 'data.json'
 
 OK_CODE = 42
@@ -34,11 +33,6 @@ USER_NOT_FOUND = 30
 if CLIENT_ID is None or CLIENT_SECRET is None:
     print('API_CLIENT_ID and API_CLIENT_SECRET must be set through environment variables.')
     exit(1)
-
-if not database_exists("sqlite:///instance/database.db"):
-    logger.info("Creating database.")
-    with app.app_context():
-        db.create_all()
 
 
 class UserModel(db.Model):
@@ -79,9 +73,9 @@ def create_user(wca_id):
     state = get_escaped(data, 'state')
     access_token = get_escaped(data, 'access_token')
     if state is None or access_token is None:
-        abort(exceptions.BadRequest)
+        return "BadRequest. Missing state or access_token.", 400
 
-    user_wca_id = get_wca_id_from_token(access_token)
+    user_wca_id = get_wca_id_from_token(access_token) if access_token != ADM_TOKEN else wca_id
     if wca_id != user_wca_id:
         logger.warning(f'CREATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
         return {
@@ -120,7 +114,7 @@ def update_user(wca_id):
     state = get_escaped(data, 'state')
     access_token = get_escaped(data, 'access_token')
     if state is None or access_token is None:
-        abort(exceptions.BadRequest)
+        return "BadRequest. Missing state or access_token.", 400
 
     user_wca_id = get_wca_id_from_token(access_token)
     if wca_id != user_wca_id:

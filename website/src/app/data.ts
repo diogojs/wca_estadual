@@ -1,6 +1,6 @@
 export interface Result {
     name: string;
-    result: string;
+    result: number;
     state: string;
     competition: string;
 }

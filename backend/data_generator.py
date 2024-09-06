@@ -223,7 +223,8 @@ def main():
         except Exception as e:
             print('Error generating data json: ')
             print(e)
-        sleepUntilTomorrow(6, 30)
+        time.sleep(30)
+        # sleepUntilTomorrow(6, 30)
 
 
 if __name__ == "__main__":

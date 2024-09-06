@@ -1,13 +1,16 @@
-<p>Home Rankings</p>
+<h1>Ranking Estadual</h1>
 <p><a routerLink="register" routerLinkActive="true">Cadastrar competidor</a></p>
 <section class="cubingEvents">
     <div>Modalidade</div>
-    <button *ngFor="let evt of events" (click)="changeEventTo(evt)">{{ evt }}</button>
+    <i *ngFor="let evt of events" class="cubing-icon icon event-{{evt}} {{currentEvent == evt ? 'icon-selected' : ''}}" (click)="changeEventTo(evt)"> </i>
+    <!-- <button *ngFor="let evt of events" (click)="changeEventTo(evt)">{{ evt }}</button> -->
 </section>
 <section class="states">
     <div>Estado</div>
-    <button (click)="changeStateTo('')">Todos</button>
-    <button *ngFor="let st of states" (click)="changeStateTo(st.abbrev)">{{ st.abbrev }}</button>
+    <select #selectedState (change)="changeStateTo(selectedState.value)">
+        <option default> </option>
+        <option *ngFor="let state of states" [value]="state.abbrev">{{ state.name }}</option>
+    </select>
 </section>
 <section class="kindOfResult">
     <div>Tipo</div>
@@ -16,8 +19,6 @@
 </section>
 <div class="row mt-3">
     <div class="col">
-        <h1>Sort & Filter Data Tables in Angular</h1>
-
         <div class="table-responsive">
         <table class="table table-hover">
             <thead class="thead-light">

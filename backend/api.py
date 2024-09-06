@@ -1,6 +1,8 @@
 import json
 import logging
 import requests
+import time
+import os
 from os import environ
 
 from markupsafe import escape
@@ -11,8 +13,8 @@ from flask_cors import CORS, cross_origin
 
 from constants import STATES
 
-# logger = logging.getLogger(__name__)
-# logging.basicConfig(filename='api.log', level=logging.INFO)
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='api.log', level=logging.INFO)
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 db = SQLAlchemy(app)
@@ -22,6 +24,7 @@ CLIENT_ID = environ.get('API_CLIENT_ID')
 CLIENT_SECRET = environ.get('API_CLIENT_SECRET')
 ADM_TOKEN = environ.get('API_ADM_TOKEN')
 DATA_FILE = 'data.json'
+ORIGINAL_DATA_FILE = 'original_data.json'
 
 OK_CODE = 42
 USER_CREATED = 10
@@ -77,7 +80,7 @@ def create_user(wca_id):
 
     user_wca_id = get_wca_id_from_token(access_token) if access_token != ADM_TOKEN else wca_id
     if wca_id != user_wca_id:
-        print(f'CREATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
+        logger.warning(f'CREATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
         return {
             'code': USER_NOT_CREATED,
             'message': f'User informed ({wca_id}) different from the one logged in WCA.'
@@ -118,7 +121,7 @@ def update_user(wca_id):
 
     user_wca_id = get_wca_id_from_token(access_token)
     if wca_id != user_wca_id:
-        print(f'UPDATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
+        logger.warning(f'UPDATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
         return {
             'code': USER_NOT_CREATED,
             'message': f'User informed ({wca_id}) different from the one logged in WCA.'
@@ -169,7 +172,7 @@ def get_token(code):
     
     if response.status_code != 200:
         msg = f'Error trying to get token from WCA.\nStatus: {response.status_code}\nHeaders: {response.headers}\nContent: {response.content}'
-        print(msg)
+        logger.warning(msg)
         return "Error trying to get token from WCA.", response.status_code
     
     j = response.json()
@@ -181,10 +184,21 @@ def get_token(code):
 
 @app.get('/ranking')
 def get_ranking_file():
-    with open(DATA_FILE, 'r') as jfile:
-        data = json.load(jfile)
+    if not os.path.exists(DATA_FILE):
+        time.sleep(1)
 
-    return data
+    try:
+        with open(DATA_FILE, 'r') as jfile:
+            data = json.load(jfile)
+
+        return data
+    except Exception as e:
+        logger.error(e)
+
+        with open(ORIGINAL_DATA_FILE, 'r') as jfile:
+            data = json.load(jfile)
+
+        return data
 
 def get_wca_id_from_token(access_token: str) -> str:
     # get wca_id and name (/me) using token

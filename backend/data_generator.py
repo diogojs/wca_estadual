@@ -5,10 +5,11 @@ import requests
 import sqlite3
 import time
 import os
+import shutil
 
 from constants import KINDS, EVENTS
 
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 ROBIN_URL = 'https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/master/api/'
 RANK_ENDPOINT = 'rank/BR/'
@@ -46,7 +47,7 @@ def get_results_by_id(wca_id: str):
     r = requests.get(url)
     
     if r.status_code != 200:
-        print(f'Result for {wca_id} not found.\n{r.status_code}')
+        logger.warning(f'Result for {wca_id} not found.\n{r.status_code}')
         return
     
     j = r.json()
@@ -144,7 +145,7 @@ def get_ranking_for_event(event: str, kind: str):
 Get users from database and merge with data from WCA /persons
 """
 def get_competitors():
-    print('Getting competitors.')
+    logger.info('Getting competitors.')
     # get users from database
     conn = sqlite3.connect(DATABASE_FILE)
     users_table = conn.execute("SELECT * FROM user_model").fetchall()
@@ -166,11 +167,11 @@ def get_competitors():
 - save data to json file
 """
 def generate_data_json():
-    print('Generating data.')
+    logger.info('Generating data.')
     global competitors
     competitors = get_competitors()
 
-    print('Getting rankings for events.')
+    logger.info('Getting rankings for events.')
     data = {
         'competitors': {
             c['id']: {'name': c['name'], 'state': c['state']} for c in competitors
@@ -184,9 +185,22 @@ def generate_data_json():
     data['results'] = result
 
     # generate data.json
-    print(f'Writing {JSON_FILE} file.')
-    with open(JSON_FILE, "w") as outfile:
-        json.dump(data, outfile)
+    logger.info(f'Writing {JSON_FILE} file.')
+
+    backup_file = f'backup_{JSON_FILE}'
+    shutil.copy2(JSON_FILE, backup_file)
+
+    try:
+        new_file = f'new_{JSON_FILE}'
+        with open(new_file, "w") as outfile:
+            json.dump(data, outfile)
+    
+        os.replace(new_file, JSON_FILE)
+    except Exception as e:
+        logger.error(e)
+        shutil.move(backup_file, JSON_FILE)
+        if os.path.exists(new_file):
+            os.remove(new_file)
     
 
 def sleepUntilTomorrow(hour, minute):
@@ -221,13 +235,13 @@ def main():
                     generate_data_json()
                     last_weekly_update = today
         except Exception as e:
-            print('Error generating data json: ')
-            print(e)
+            logger.error('Error generating data json: ')
+            logger.error(e)
         time.sleep(30)
         # sleepUntilTomorrow(6, 30)
 
 
 if __name__ == "__main__":
-    # logging.basicConfig(filename='data_generator.log', level=logging.INFO)
+    logging.basicConfig(filename='data_generator.log', level=logging.INFO)
     main()
 

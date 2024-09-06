@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the project files
 COPY . .
+COPY original_data.json data.json
 
 # Expose the server port
 EXPOSE 8080

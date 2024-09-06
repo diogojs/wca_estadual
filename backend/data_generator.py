@@ -184,6 +184,7 @@ def generate_data_json():
     data['results'] = result
 
     # generate data.json
+    logger.info(f'Writing {JSON_FILE} file.')
     with open(JSON_FILE, "w") as outfile:
         json.dump(data, outfile)
     
@@ -221,8 +222,8 @@ def main():
                     last_weekly_update = today
         except Exception as e:
             logger.error('Error generating data json: ')
-            logger.error(e.with_traceback())
-        sleepUntilTomorrow(16, 55)
+            logger.error(e)
+        sleepUntilTomorrow(6, 30)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ import os
 
 from constants import KINDS, EVENTS
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 ROBIN_URL = 'https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/master/api/'
 RANK_ENDPOINT = 'rank/BR/'
@@ -144,7 +144,7 @@ def get_ranking_for_event(event: str, kind: str):
 Get users from database and merge with data from WCA /persons
 """
 def get_competitors():
-    logger.info('Getting competitors.')
+    print('Getting competitors.')
     # get users from database
     conn = sqlite3.connect(DATABASE_FILE)
     users_table = conn.execute("SELECT * FROM user_model").fetchall()
@@ -166,11 +166,11 @@ def get_competitors():
 - save data to json file
 """
 def generate_data_json():
-    logger.info('Generating data.')
+    print('Generating data.')
     global competitors
     competitors = get_competitors()
 
-    logger.info('Getting rankings for events.')
+    print('Getting rankings for events.')
     data = {
         'competitors': {
             c['id']: {'name': c['name'], 'state': c['state']} for c in competitors
@@ -184,7 +184,7 @@ def generate_data_json():
     data['results'] = result
 
     # generate data.json
-    logger.info(f'Writing {JSON_FILE} file.')
+    print(f'Writing {JSON_FILE} file.')
     with open(JSON_FILE, "w") as outfile:
         json.dump(data, outfile)
     
@@ -221,12 +221,12 @@ def main():
                     generate_data_json()
                     last_weekly_update = today
         except Exception as e:
-            logger.error('Error generating data json: ')
-            logger.error(e)
+            print('Error generating data json: ')
+            print(e)
         sleepUntilTomorrow(6, 30)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='data_generator.log', level=logging.INFO)
+    # logging.basicConfig(filename='data_generator.log', level=logging.INFO)
     main()
 

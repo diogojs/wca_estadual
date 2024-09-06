@@ -11,8 +11,8 @@ from flask_cors import CORS, cross_origin
 
 from constants import STATES
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename='api.log', level=logging.INFO)
+# logger = logging.getLogger(__name__)
+# logging.basicConfig(filename='api.log', level=logging.INFO)
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 db = SQLAlchemy(app)
@@ -77,7 +77,7 @@ def create_user(wca_id):
 
     user_wca_id = get_wca_id_from_token(access_token) if access_token != ADM_TOKEN else wca_id
     if wca_id != user_wca_id:
-        logger.warning(f'CREATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
+        print(f'CREATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
         return {
             'code': USER_NOT_CREATED,
             'message': f'User informed ({wca_id}) different from the one logged in WCA.'
@@ -118,7 +118,7 @@ def update_user(wca_id):
 
     user_wca_id = get_wca_id_from_token(access_token)
     if wca_id != user_wca_id:
-        logger.warning(f'UPDATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
+        print(f'UPDATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
         return {
             'code': USER_NOT_CREATED,
             'message': f'User informed ({wca_id}) different from the one logged in WCA.'
@@ -169,7 +169,7 @@ def get_token(code):
     
     if response.status_code != 200:
         msg = f'Error trying to get token from WCA.\nStatus: {response.status_code}\nHeaders: {response.headers}\nContent: {response.content}'
-        logger.error(msg)
+        print(msg)
         return "Error trying to get token from WCA.", response.status_code
     
     j = response.json()

@@ -641,15 +641,14 @@ export class HomeRankingsComponent implements OnInit {
             }
         }
     }
-    this.results = mock;
-    // this.resultsService.getResults().subscribe(
-    //   (response: JSON) => {
-    //     this.results = response;
-    //     this.updateFilteredResults();
-    //   }
-    // )
-
-    this.updateFilteredResults();
+    // this.results = mock;
+    this.resultsService.getResults().subscribe(
+      (response: JSON) => {
+        this.results = response;
+        console.log(response);
+        this.updateFilteredResults();
+      }
+    )
   }
 
   updateFilteredResults(): void {

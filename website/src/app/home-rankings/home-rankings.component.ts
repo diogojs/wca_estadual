@@ -53,8 +53,8 @@ export class HomeRankingsComponent implements OnInit {
   currentKindOfResult: string = "single";
   
   currentPage: number = 1;
-  resultsPerPage: number = 20;
-  lastPage: number = 99;
+  resultsPerPage: number = 3;
+  lastPage: number = 999;
 
   constructor(private resultsService: ResultsService) { }
 
@@ -608,15 +608,15 @@ export class HomeRankingsComponent implements OnInit {
             }
         }
     }
-    // this.results = mock;
-    // this.updateFilteredResults();
-    this.resultsService.getResults().subscribe(
-      (response: JSON) => {
-        this.results = response;
-        console.log(response);
-        this.updateFilteredResults();
-      }
-    )
+    this.results = mock;
+    this.updateFilteredResults();
+    // this.resultsService.getResults().subscribe(
+    //   (response: JSON) => {
+    //     this.results = response;
+    //     console.log(response);
+    //     this.updateFilteredResults();
+    //   }
+    // )
   }
 
   updateFilteredResults(): void {

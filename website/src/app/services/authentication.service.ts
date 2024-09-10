@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { User } from '../data';
@@ -10,11 +10,13 @@ import { User } from '../data';
 })
 export class AuthenticationService {
   api_code: string = "";
-  data_url: string = "https://www.worldcubeassociation.org/api/v0/me"
+  data_url: string = "https://www.worldcubeassociation.org/api/v0/me";
+  public loadingToken: boolean = false;
   
   constructor(
     private route: ActivatedRoute,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private router: Router
   ) {
     this.route.queryParamMap.subscribe(
       (query: any) => {
@@ -22,6 +24,7 @@ export class AuthenticationService {
         if (params) {
           this.api_code = params['code'];
           if (this.api_code) {
+            this.loadingToken = true;
             console.log(`api_code: ${this.api_code}`);
             this.requestToken();
           }
@@ -90,9 +93,9 @@ export class AuthenticationService {
         let me = response['me']
         if (me) {
           sessionStorage.setItem("wca_id", me['wca_id']);
-          if (location.search.includes("code="))
-            location.search = "";
         }
+        this.loadingToken = false;
+        this.router.navigate(['register']);
       }
     )
   }

@@ -105,3 +105,12 @@ text-align: center;
 .cubing-icon.penalty-A6c:before { content: "\EA3E" }
 .cubing-icon.penalty-A6d:before { content: "\EA3F" }
 .cubing-icon.penalty-A6e:before { content: "\EA40" }
+
+div {
+        &.pagination {
+                div {
+                        margin:5px;
+                }
+        }
+
+}

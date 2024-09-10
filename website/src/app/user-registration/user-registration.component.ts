@@ -3,12 +3,13 @@ import { AuthenticationService } from '../services/authentication.service';
 import { CommonModule } from '@angular/common';
 import { ApiCodes, State, User } from '../data';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 
 @Component({
   selector: 'app-user-registration',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, RouterLinkActive],
   templateUrl: './user-registration.component.html',
   styleUrl: './user-registration.component.scss'
 })
@@ -45,6 +46,11 @@ export class UserRegistrationComponent implements OnInit {
   ]
   dropDownForm: FormGroup;
 
+  processing = false;
+  updated = false;
+  error_msg = "";
+  success_msg = "";
+
   constructor(private authService: AuthenticationService) { 
     this.dropDownForm = new FormGroup({
       stateForm: new FormControl(null)
@@ -61,8 +67,6 @@ export class UserRegistrationComponent implements OnInit {
           // TODO: check response.status_code
           if (response['code'] == ApiCodes.OK_CODE) {
             this.userData = response['user'];
-            console.log('Current user:');
-            console.log(this.userData);
             stateForm?.setValue(this.userData!.state)
           } else if (response['code'] == ApiCodes.USER_NOT_FOUND){
             console.log("User do not exist yet.");
@@ -90,24 +94,63 @@ export class UserRegistrationComponent implements OnInit {
   }
 
   submit(): void {
+    this.processing = true;
     if (this.userData) {
-      this.authService.updateUser(this.userData).subscribe(
-        response => {
-          console.log(response);
-        }
-      );
+      this.authService.updateUser(this.userData).subscribe({
+        next: (response) => {
+          this.handleResponse(response, ApiCodes.USER_UPDATED, ApiCodes.USER_NOT_UPDATED);
+        },
+        error: (error) => {
+          console.log('An error occurred:', error);
+          this.setError("Algo deu errado. Verifique se você preencheu todos os dados corretamente ou tente novamente mais tarde.");
+        },
+        complete: () => {}
+      });
     } else {
       this.authService.createUser(
         {
           wca_id: this.getCurrentWcaId(),
           state: this.dropDownForm.get('stateForm')?.value,
           last_updated: 'useless'
-        }).subscribe(
-          response => {
-            console.log(response);
-          }
-        );
+        }).subscribe({
+            next: (response) => {
+              this.handleResponse(response, ApiCodes.USER_CREATED, ApiCodes.USER_NOT_CREATED);
+            },
+            error: (error) => {
+              console.log('An error occurred:', error);
+              this.setError("Algo deu errado. Verifique se você preencheu todos os dados corretamente ou tente novamente mais tarde.");
+            },
+            complete: () => {}
+        });
     }
+  }
+
+  handleResponse(response: any, success: number, fail: number): void {
+    console.log(response);
+    let return_code = response['code'];
+    if (return_code == success)
+      this.setSuccess(response['message']);
+    else if (return_code == fail)
+      this.setError(response['message']);
+    else {
+      this.setError("Algo deu errado. Tente novamente mais tarde.");
+      console.log(`Error on creating/updating user. Code: ${return_code}`);
+      if (return_code == undefined)
+        console.log(response);
+    }
+    this.processing = false;
+  }
+
+  setSuccess(msg: string): void {
+    this.success_msg = msg;
+    this.error_msg = "";
+    this.processing = false;
+  }
+
+  setError(msg: string): void {
+    this.error_msg = msg;
+    this.success_msg = "";
+    this.processing = false;
   }
 
   isLogged(): boolean {

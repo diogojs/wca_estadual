@@ -1,10 +1,13 @@
 <h1>Ranking Estadual</h1>
+
 <p><a routerLink="register" routerLinkActive="true">Cadastrar competidor</a></p>
+
 <section class="cubingEvents">
     <div>Modalidade</div>
     <i *ngFor="let evt of events" class="cubing-icon icon event-{{evt}} {{currentEvent == evt ? 'icon-selected' : ''}}" (click)="changeEventTo(evt)"> </i>
     <!-- <button *ngFor="let evt of events" (click)="changeEventTo(evt)">{{ evt }}</button> -->
 </section>
+
 <section class="states">
     <div>Estado</div>
     <select #selectedState (change)="changeStateTo(selectedState.value)">
@@ -12,11 +15,13 @@
         <option *ngFor="let state of states" [value]="state.abbrev">{{ state.name }}</option>
     </select>
 </section>
+
 <section class="kindOfResult">
     <div>Tipo</div>
     <button (click)="changeKindTo('single')">Single</button>
     <button (click)="changeKindTo('average')">Average</button>
 </section>
+
 <div class="row mt-3">
     <div class="col">
         <div class="table-responsive">
@@ -27,19 +32,24 @@
                 <th class="text-center">Nome</th>
                 <th class="text-center" width="100">{{ currentKindOfResult[0].toUpperCase() + currentKindOfResult.substring(1) }}</th>
                 <th class="text-center" width="100">Estado</th>
-                <th class="text-center">Competição</th>
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let result of filteredResults; index as idx">
-                <td>{{ idx + 1 }}</td>
+            <tr *ngFor="let result of tabledResults; index as idx">
+                <td>{{ (currentPage*resultsPerPage) + idx + 1 }}</td>
                 <td>{{ result.name }}</td>
                 <td>{{ viewResult(result.result) }}</td>
                 <td>{{ result.state }}</td>
-                <td>{{ result.competition }}</td>
             </tr>
             </tbody>
         </table>
+        </div>
+        <div class="pagination" *ngIf="filteredResults.length >= resultsPerPage">
+            <div id="pagination-first" (click)="goToPage(0)">&lt;&lt;</div>
+            <div id="pagination-left" (click)="goToPage(currentPage-1)">&lt;</div>
+            <div> Página {{ currentPage+1 }} / {{ lastPage+1 }} </div>
+            <div id="pagination-right" (click)="goToPage(currentPage+1)">&gt;</div>
+            <div id="pagination-last" (click)="goToLastPage()">&gt;&gt;</div>
         </div>
     </div>
 </div>

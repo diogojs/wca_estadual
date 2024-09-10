@@ -5,11 +5,17 @@
 
 <section class="cadastro" *ngIf="isLogged()">
     <form [formGroup]="dropDownForm">
-        <label>WCA ID: {{ getCurrentWcaId() }}</label>
+        <label>WCA ID: {{ getCurrentWcaId() }}</label><br>
         <select formControlName="stateForm">
             <option selected></option>
             <option *ngFor="let state of states" [value]="state.abbrev">{{ state.name }}</option>
-        </select>
-        <button (click)="submit()">{{ userData ? 'Atualizar' : 'Cadastrar' }}</button><br>
+        </select><br>
+        <button [disabled]="processing" (click)="submit()">
+            {{ processing ? 'Processando...' : userData ? 'Atualizar' : 'Cadastrar' }}
+        </button><br>
+        <div *ngIf="error_msg" class="error-label">{{ error_msg }}</div>
+        <div *ngIf="success_msg" class="ok-label">{{ success_msg }}</div>
     </form>
 </section>
+
+<p><a routerLink="/" routerLinkActive="true">Voltar para Página Inicial</a></p>

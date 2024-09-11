@@ -1,8 +1,0 @@
-{
-    "/oauth/token": {
-        "target": "https://www.worldcubeassociation.org",
-        "secure": true,
-        "changeOrigin": true,
-        "logLevel": "debug"
-    }
-}

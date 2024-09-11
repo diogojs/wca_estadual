@@ -15,8 +15,9 @@ ROBIN_URL = 'https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/mas
 RANK_ENDPOINT = 'rank/BR/'
 PERSON_ENDPOINT = 'persons/'
 
-DATABASE_FILE = "instance/database.db"
-JSON_FILE = "data.json"
+ROOT_PATH = "/home/diogojs/wca_statistics/backend"
+DATABASE_FILE = f"{ROOT_PATH}/instance/database.db"
+JSON_FILE = f"{ROOT_PATH}/data.json"
 database_last_updated = 1
 
 
@@ -187,11 +188,11 @@ def generate_data_json():
     # generate data.json
     logger.info(f'Writing {JSON_FILE} file.')
 
-    backup_file = f'backup_{JSON_FILE}'
+    backup_file = f'{ROOT_PATH}/backup_{JSON_FILE}'
     shutil.copy2(JSON_FILE, backup_file)
 
     try:
-        new_file = f'new_{JSON_FILE}'
+        new_file = f'{ROOT_PATH}/new_{JSON_FILE}'
         with open(new_file, "w") as outfile:
             json.dump(data, outfile)
     
@@ -221,27 +222,27 @@ def inner_database_is_updated() -> bool:
     return False
 
 
-def main():
-    time.sleep(30) # wait some time for database to be created
-    last_weekly_update = datetime.datetime.today()
-    while True:
-        try:
-            today = datetime.datetime.today()
-            if (today - last_weekly_update).days >= 7:  # update at least once a week to get new results from WCA
-                generate_data_json()
-                last_weekly_update = today
-            else:
-                if inner_database_is_updated():
-                    generate_data_json()
-                    last_weekly_update = today
-        except Exception as e:
-            logger.error('Error generating data json: ')
-            logger.error(e)
-        time.sleep(30)
+# def main():
+#     time.sleep(30) # wait some time for database to be created
+#     last_weekly_update = datetime.datetime.today()
+#     while True:
+#         try:
+#             today = datetime.datetime.today()
+#             if (today - last_weekly_update).days >= 7:  # update at least once a week to get new results from WCA
+#                 generate_data_json()
+#                 last_weekly_update = today
+#             else:
+#                 if inner_database_is_updated():
+#                     generate_data_json()
+#                     last_weekly_update = today
+#         except Exception as e:
+#             logger.error('Error generating data json: ')
+#             logger.error(e)
+#         time.sleep(30)
         # sleepUntilTomorrow(6, 30)
 
 
 if __name__ == "__main__":
     logging.basicConfig(filename='data_generator.log', level=logging.INFO)
-    main()
+    generate_data_json()
 

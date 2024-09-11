@@ -18,7 +18,7 @@ logging.basicConfig(filename='api.log', level=logging.INFO)
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 db = SQLAlchemy(app)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 CLIENT_ID = environ.get('API_CLIENT_ID')
 CLIENT_SECRET = environ.get('API_CLIENT_SECRET')
@@ -59,7 +59,7 @@ def get_user_by_id(wca_id):
     if not user:
         return {
             'code': USER_NOT_FOUND,
-            'message': f'No user found with id {escape(wca_id)}'
+            'message': f'Nenhum usuário encontrado com ID {escape(wca_id)}'
             }
     
     user_data = {
@@ -75,29 +75,31 @@ def create_user(wca_id):
 
     state = get_escaped(data, 'state')
     access_token = get_escaped(data, 'access_token')
-    if state is None or access_token is None:
-        return "BadRequest. Missing state or access_token.", 400
+    if state is None:
+        return "BadRequest. Estado não foi informado na request.", 400
+    if access_token is None:
+        return "BadRequest. Access token não informado. Certifique-se de que está logado na WCA.", 400
 
     user_wca_id = get_wca_id_from_token(access_token) if access_token != ADM_TOKEN else wca_id
     if wca_id != user_wca_id:
         logger.warning(f'CREATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
         return {
             'code': USER_NOT_CREATED,
-            'message': f'User informed ({wca_id}) different from the one logged in WCA.'
+            'message': f'Usuário informado ({wca_id}) diferente do usuário logado na WCA.'
         }
 
     # check wca_id do not exist yet
     if UserModel.query.filter_by(wca_id=user_wca_id).first() is not None:
         return {
             'code': USER_NOT_CREATED,
-            'message': f'User {user_wca_id} already exists.'
+            'message': f'Usuário {user_wca_id} já existente no banco de dados.'
         }
 
     # check state is valid
     if state not in STATES:
         return {
             'code': USER_NOT_CREATED,
-            'message': f'State {state} not valid.'
+            'message': f'Estado informado ("{state}") inválido.'
         }
 
     today = datetime.now().date()
@@ -107,8 +109,8 @@ def create_user(wca_id):
 
     return {
         'code': USER_CREATED,
-        'message': 'New user created'
-        }
+        'message': 'Novo usuário cadastrado com sucesso.'
+    }
 
 @app.put('/user/<wca_id>')
 def update_user(wca_id):
@@ -116,15 +118,17 @@ def update_user(wca_id):
 
     state = get_escaped(data, 'state')
     access_token = get_escaped(data, 'access_token')
-    if state is None or access_token is None:
-        return "BadRequest. Missing state or access_token.", 400
+    if state is None:
+        return "BadRequest. Estado não foi informado na request.", 400
+    if access_token is None:
+        return "BadRequest. Access token não informado. Certifique-se de que está logado na WCA.", 400
 
-    user_wca_id = get_wca_id_from_token(access_token)
+    user_wca_id = get_wca_id_from_token(access_token) if access_token != ADM_TOKEN else wca_id
     if wca_id != user_wca_id:
-        logger.warning(f'UPDATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
+        logger.warning(f'CREATE_USER: Route wca_id ({wca_id}) different from wca/me ({user_wca_id}). Access token: {access_token}')
         return {
             'code': USER_NOT_CREATED,
-            'message': f'User informed ({wca_id}) different from the one logged in WCA.'
+            'message': f'Usuário informado ({wca_id}) diferente do usuário logado na WCA.'
         }
 
     user = UserModel.query.filter_by(wca_id=user_wca_id).first()
@@ -132,15 +136,15 @@ def update_user(wca_id):
     if not user:
         return {
             'code': USER_NOT_FOUND,
-            'message': f'No user found with id {user_wca_id}'
-            }
+            'message': f'Nenhum usuário encontrado com ID {user_wca_id}.'
+        }
 
     today = datetime.now().date()
-    # if (today - user.last_updated).days < 1:
-    #     return {
-    #         'code': USER_NOT_UPDATED,
-    #         'message': f'User was updated recently ({user.last_updated}). Not possible to update again.'
-    #         }
+    if (today - user.last_updated).days < 1:
+        return {
+            'code': USER_NOT_UPDATED,
+            'message': f'Usuário já foi atualizado recentemente ({user.last_updated}). Por razões de segurança só é permitida uma atualização por dia.'
+        }
 
     if user.state != state:
         user.state = state
@@ -149,7 +153,7 @@ def update_user(wca_id):
 
     return {
         'code': USER_UPDATED,
-        'message': 'User updated correctly'
+        'message': 'Usuário atualizado com sucesso.'
     }
 
 

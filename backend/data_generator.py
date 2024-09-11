@@ -15,9 +15,9 @@ ROBIN_URL = 'https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/mas
 RANK_ENDPOINT = 'rank/BR/'
 PERSON_ENDPOINT = 'persons/'
 
-ROOT_PATH = "/home/diogojs/wca_statistics/backend"
-DATABASE_FILE = f"{ROOT_PATH}/instance/database.db"
-JSON_FILE = f"{ROOT_PATH}/data.json"
+ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+DATABASE_FILE = "instance/database.db"
+JSON_FILE = "data.json"
 database_last_updated = 1
 
 
@@ -148,7 +148,8 @@ Get users from database and merge with data from WCA /persons
 def get_competitors():
     logger.info('Getting competitors.')
     # get users from database
-    conn = sqlite3.connect(DATABASE_FILE)
+    database_path = os.path.join(ROOT_PATH, DATABASE_FILE)
+    conn = sqlite3.connect(database_path)
     users_table = conn.execute("SELECT * FROM user_model").fetchall()
 
     # for each user get/append data from WCA
@@ -186,22 +187,24 @@ def generate_data_json():
     data['results'] = result
 
     # generate data.json
-    logger.info(f'Writing {JSON_FILE} file.')
 
-    backup_file = f'{ROOT_PATH}/backup_{JSON_FILE}'
-    if os.path.exists(JSON_FILE):
-        shutil.copy2(JSON_FILE, backup_file)
+    backup_file = os.path.join(ROOT_PATH, 'backup_{JSON_FILE}')
+    json_path = os.path.join(ROOT_PATH, JSON_FILE)
+    logger.info(f'Writing {json_path} file.')
+    if os.path.exists(json_path):
+        shutil.copy2(json_path, backup_file)
 
     try:
-        new_file = f'{ROOT_PATH}/new_{JSON_FILE}'
+        new_file = os.path.join(ROOT_PATH, 'new_{JSON_FILE}')
         with open(new_file, "w") as outfile:
             json.dump(data, outfile)
     
-        os.replace(new_file, JSON_FILE)
+        os.replace(new_file, json_path)
     except Exception as e:
         logger.error(e)
         if os.path.exists(backup_file):
-            shutil.move(backup_file, JSON_FILE)
+            shutil.move(backup_file, json_path)
+            logger.warning('Restored backup')
         if os.path.exists(new_file):
             os.remove(new_file)
     

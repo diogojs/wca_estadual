@@ -189,7 +189,8 @@ def generate_data_json():
     logger.info(f'Writing {JSON_FILE} file.')
 
     backup_file = f'{ROOT_PATH}/backup_{JSON_FILE}'
-    shutil.copy2(JSON_FILE, backup_file)
+    if os.path.exists(JSON_FILE):
+        shutil.copy2(JSON_FILE, backup_file)
 
     try:
         new_file = f'{ROOT_PATH}/new_{JSON_FILE}'
@@ -199,7 +200,8 @@ def generate_data_json():
         os.replace(new_file, JSON_FILE)
     except Exception as e:
         logger.error(e)
-        shutil.move(backup_file, JSON_FILE)
+        if os.path.exists(backup_file):
+            shutil.move(backup_file, JSON_FILE)
         if os.path.exists(new_file):
             os.remove(new_file)
     

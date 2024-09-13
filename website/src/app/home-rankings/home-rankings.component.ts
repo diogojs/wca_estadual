@@ -53,7 +53,7 @@ export class HomeRankingsComponent implements OnInit {
   currentKindOfResult: string = "single";
   
   currentPage: number = 1;
-  resultsPerPage: number = 3;
+  resultsPerPage: number = 5;
   lastPage: number = 999;
 
   constructor(private resultsService: ResultsService) { }

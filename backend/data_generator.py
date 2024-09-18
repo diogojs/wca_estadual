@@ -185,17 +185,18 @@ def generate_data_json():
         for event in EVENTS:
             result[kind][event] = get_ranking_for_event(event, kind)
     data['results'] = result
+    data['latest_update'] = datetime.datetime.now()
 
     # generate data.json
 
-    backup_file = os.path.join(ROOT_PATH, 'backup_{JSON_FILE}')
+    backup_file = os.path.join(ROOT_PATH, f'backup_{JSON_FILE}')
     json_path = os.path.join(ROOT_PATH, JSON_FILE)
     logger.info(f'Writing {json_path} file.')
     if os.path.exists(json_path):
         shutil.copy2(json_path, backup_file)
 
     try:
-        new_file = os.path.join(ROOT_PATH, 'new_{JSON_FILE}')
+        new_file = os.path.join(ROOT_PATH, f'new_{JSON_FILE}')
         with open(new_file, "w") as outfile:
             json.dump(data, outfile)
     

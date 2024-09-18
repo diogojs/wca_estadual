@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone, timedelta
 import logging
 import json
 import requests
@@ -185,7 +185,7 @@ def generate_data_json():
         for event in EVENTS:
             result[kind][event] = get_ranking_for_event(event, kind)
     data['results'] = result
-    data['latest_update'] = datetime.datetime.now()
+    data['latest_update'] = datetime.now().astimezone(timezone(timedelta(hours=-3))).strftime('%d/%m/%Y %H:%M')
 
     # generate data.json
 
@@ -211,10 +211,10 @@ def generate_data_json():
     
 
 def sleepUntilTomorrow(hour, minute):
-    t = datetime.datetime.today()
-    future = datetime.datetime(t.year, t.month, t.day, hour, minute)
+    t = datetime.today()
+    future = datetime(t.year, t.month, t.day, hour, minute)
     if t.timestamp() > future.timestamp():
-        future += datetime.timedelta(days=1)
+        future += timedelta(days=1)
     time.sleep((future-t).seconds)
 
 
@@ -230,10 +230,10 @@ def inner_database_is_updated() -> bool:
 
 # def main():
 #     time.sleep(30) # wait some time for database to be created
-#     last_weekly_update = datetime.datetime.today()
+#     last_weekly_update = datetime.today()
 #     while True:
 #         try:
-#             today = datetime.datetime.today()
+#             today = datetime.today()
 #             if (today - last_weekly_update).days >= 7:  # update at least once a week to get new results from WCA
 #                 generate_data_json()
 #                 last_weekly_update = today

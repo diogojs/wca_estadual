@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { User } from '../data';
@@ -10,11 +10,13 @@ import { User } from '../data';
 })
 export class AuthenticationService {
   api_code: string = "";
-  data_url: string = "https://www.worldcubeassociation.org/api/v0/me"
+  data_url: string = "https://www.worldcubeassociation.org/api/v0/me";
+  public loadingToken: boolean = false;
   
   constructor(
     private route: ActivatedRoute,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private router: Router
   ) {
     this.route.queryParamMap.subscribe(
       (query: any) => {
@@ -22,6 +24,7 @@ export class AuthenticationService {
         if (params) {
           this.api_code = params['code'];
           if (this.api_code) {
+            this.loadingToken = true;
             console.log(`api_code: ${this.api_code}`);
             this.requestToken();
           }
@@ -48,14 +51,19 @@ export class AuthenticationService {
       redirect_uri:window.location.origin
     }
     console.log(api_params);
-    this.httpClient.post<any>(`${environment.BACKEND_URL}/token/${this.api_code}`, api_params).subscribe(
-      (response: any) => {
+    this.httpClient.post<any>(`${environment.BACKEND_URL}/token/${this.api_code}`, api_params).subscribe({
+      next: (response: any) => {
         // TODO: check if there is no token
         sessionStorage.setItem("access_token", response['access_token']);
         console.log(`Got token ${this.token()}`);
         this.getUserWID();
-      }
-    )
+      },
+      error: (error) => {
+        console.log('An error occurred:', error);
+        this.loadingToken = false;
+      },
+      complete: () => {}
+    })
   }
 
   getUserData(wca_id: string): Observable<any> {
@@ -85,16 +93,21 @@ export class AuthenticationService {
       'Authorization': `Bearer ${this.token()}`,
       'Content-Type': 'application/json'
     }
-    this.httpClient.get<any>(this.data_url, {headers: headers}).subscribe(
-      (response: any) => {
+    this.httpClient.get<any>(this.data_url, {headers: headers}).subscribe({
+      next: (response: any) => {
         let me = response['me']
         if (me) {
           sessionStorage.setItem("wca_id", me['wca_id']);
-          if (location.search.includes("code="))
-            location.search = "";
         }
-      }
-    )
+        this.loadingToken = false;
+        this.router.navigate(['register']);
+      },
+      error: (error) => {
+        console.log('An error occurred:', error);
+        this.loadingToken = false;
+      },
+      complete: () => {}
+    })
   }
 
   isLogged(): boolean {

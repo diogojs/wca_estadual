@@ -48,7 +48,7 @@ export class AuthenticationService {
 
   requestToken(): void {
     let api_params = {
-      redirect_uri:window.location.origin
+      redirect_uri:environment.APP_URL
     }
     console.log(api_params);
     this.httpClient.post<any>(`${environment.BACKEND_URL}/token/${this.api_code}`, api_params).subscribe({

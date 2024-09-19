@@ -1,9 +1,9 @@
-<section *ngIf="false">
+<section *ngIf="!isLogged()">
     <p>Você precisa logar na WCA para poder se cadastrar no Ranking.</p>
     <button (click)="login()">Login</button>
 </section>
 
-<section class="cadastro" *ngIf="true">
+<section class="cadastro" *ngIf="isLogged()">
     <form [formGroup]="dropDownForm">
         <label>ID WCA: {{ getCurrentWcaId() }}</label><br>
         <label>Estado: </label>

@@ -1,11 +1,12 @@
-<section *ngIf="!isLogged()">
+<section *ngIf="false">
     <p>Você precisa logar na WCA para poder se cadastrar no Ranking.</p>
     <button (click)="login()">Login</button>
 </section>
 
-<section class="cadastro" *ngIf="isLogged()">
+<section class="cadastro" *ngIf="true">
     <form [formGroup]="dropDownForm">
-        <label>WCA ID: {{ getCurrentWcaId() }}</label><br>
+        <label>ID WCA: {{ getCurrentWcaId() }}</label><br>
+        <label>Estado: </label>
         <select formControlName="stateForm">
             <option selected></option>
             <option *ngFor="let state of states" [value]="state.abbrev">{{ state.name }}</option>

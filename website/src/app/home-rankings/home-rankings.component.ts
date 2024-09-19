@@ -606,17 +606,18 @@ export class HomeRankingsComponent implements OnInit {
                     }
                 ]
             }
-        }
+        },
+        "latest_update": "18/09/2024 07:05"
     }
-    this.results = mock;
-    this.updateFilteredResults();
-    // this.resultsService.getResults().subscribe(
-    //   (response: JSON) => {
-    //     this.results = response;
-    //     console.log(response);
-    //     this.updateFilteredResults();
-    //   }
-    // )
+    // this.results = mock;
+    // this.updateFilteredResults();
+    this.resultsService.getResults().subscribe(
+      (response: JSON) => {
+        this.results = response;
+        console.log(response);
+        this.updateFilteredResults();
+      }
+    )
   }
 
   updateFilteredResults(): void {

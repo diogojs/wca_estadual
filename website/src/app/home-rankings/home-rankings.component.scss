@@ -110,12 +110,12 @@ text-align: center;
         // background: black;
         display: flex;
         justify-content: space-between;
-        align-items: baseline;
+        align-items: center;
         margin-bottom: 2rem;
         a{
                 text-decoration: none;
                 color: black;
-                margin: 0px 2rem;
+                margin: 0px 1rem;
                 padding: 8px;
                 background: #5dc9f0;
                 border-radius: 5px;
@@ -123,6 +123,10 @@ text-align: center;
                         background: #4cb2e6;
                 }
         }
+}
+
+.updatedInfo{
+        margin-bottom: 1rem;
 }
 
 .alignSection{
@@ -155,7 +159,7 @@ text-align: center;
                                         background: #233052;
                                 }
                                 &.active{
-                                        background: #233052;
+                                        background: #2c3a60;
                                 }
                         }
                 }
@@ -199,4 +203,8 @@ div {
                         }
                 }
         }
+}
+
+.row {
+        margin-bottom: 10%;
 }

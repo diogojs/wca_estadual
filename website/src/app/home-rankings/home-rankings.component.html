@@ -2,17 +2,18 @@
 
 
 <div id="alignTop">
-<h1>Ranking Estadual</h1>
+    <h1>Ranking Estadual</h1>
 
-<a routerLink="register" routerLinkActive="true">
-    Cadastrar competidor
-</a>
+    <a routerLink="register" routerLinkActive="true">
+        Cadastrar competidor
+    </a>
 </div>
+
+<div class="updatedInfo">Última Atualização: <i>{{ results['latest_update'] }}</i></div>
 
 <section class="cubingEvents">
     <h6>Modalidade</h6>
     <i *ngFor="let evt of events" class="cubing-icon icon event-{{evt}} {{currentEvent == evt ? 'icon-selected' : ''}}" (click)="changeEventTo(evt)"> </i>
-    <!-- <button *ngFor="let evt of events" (click)="changeEventTo(evt)">{{ evt }}</button> -->
 </section>
 
 <!--                     JUNÇÃO DAS SEÇÕES PARA ALINHAMENTO              -->
@@ -23,8 +24,8 @@
 
     <section class="kindOfResult">
         <h6>Tipo</h6>
-        <button  (click)="changeKindTo('single')" id="buttonSingle">Single</button>
-        <button (click)="changeKindTo('average')" id="buttonAverage">Average</button>
+        <button  (click)="changeKindTo('single')" id="buttonSingle" [ngClass]="currentKindOfResult == 'single' ? 'active' : ''">Single</button>
+        <button (click)="changeKindTo('average')" id="buttonAverage" [ngClass]="currentKindOfResult == 'average' ? 'active' : ''">Average</button>
     </section>
     
     <!--                           SELEÇÃO DE ESTADO          -->

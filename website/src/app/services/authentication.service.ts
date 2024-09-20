@@ -25,7 +25,7 @@ export class AuthenticationService {
           this.api_code = params['code'];
           if (this.api_code) {
             this.loadingToken = true;
-            console.log(`api_code: ${this.api_code}`);
+            // console.log(`api_code: ${this.api_code}`);
             this.requestToken();
           }
         }
@@ -55,7 +55,7 @@ export class AuthenticationService {
       next: (response: any) => {
         // TODO: check if there is no token
         sessionStorage.setItem("access_token", response['access_token']);
-        console.log(`Got token ${this.token()}`);
+        // console.log(`Got token ${this.token()}`);
         this.getUserWID();
       },
       error: (error) => {
@@ -83,8 +83,8 @@ export class AuthenticationService {
       state: userData.state,
       access_token: this.token(),
     };
-    console.log("Putting");
-    console.log(body);
+    // console.log("Putting");
+    // console.log(body);
     return this.httpClient.put<any>(`${environment.BACKEND_URL}/user/${userData.wca_id}`, body);
   }
 
@@ -114,4 +114,12 @@ export class AuthenticationService {
     let wcaid = sessionStorage.getItem("wca_id");
     return (wcaid != null)
   }
+
+  // logout(): void {
+  //   if (sessionStorage.getItem("access_token") || sessionStorage.getItem("wca_id")) {
+  //     sessionStorage.clear();
+  //     let redirectUrl = "https://www.worldcubeassociation.org/users/sign_out";
+  //     window.open(redirectUrl, "_blank");
+  //   }
+  // }
 }

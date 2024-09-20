@@ -13,7 +13,9 @@
         </select><br>
         <button [disabled]="processing" (click)="submit()">
             {{ processing ? 'Processando...' : userData ? 'Atualizar' : 'Cadastrar' }}
-        </button><br>
+        </button>
+        <!-- <button [disabled]="processing" (click)="logout()">Deslogar</button> -->
+        <br>
         <div *ngIf="error_msg" class="error-label">{{ error_msg }}</div>
         <div *ngIf="success_msg" class="ok-label">{{ success_msg }}</div>
     </form>

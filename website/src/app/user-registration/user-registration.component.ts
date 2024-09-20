@@ -64,7 +64,6 @@ export class UserRegistrationComponent implements OnInit {
         (response: any) => {
           let stateForm = this.dropDownForm.get('stateForm');
 
-          // TODO: check response.status_code
           if (response['code'] == ApiCodes.OK_CODE) {
             this.userData = response['user'];
             stateForm?.setValue(this.userData!.state)
@@ -85,13 +84,22 @@ export class UserRegistrationComponent implements OnInit {
   }
 
   login(): void {
-    if (this.authService.isLogged()) {
+    if (this.isLogged()) {
       return;
     }
     else {
       this.authService.login();
     }
   }
+
+  // logout(): void {
+  //   if (!this.isLogged()) {
+  //     return;
+  //   }
+  //   else {
+  //     this.authService.logout();
+  //   }
+  // }
 
   submit(): void {
     this.processing = true;
@@ -126,7 +134,7 @@ export class UserRegistrationComponent implements OnInit {
   }
 
   handleResponse(response: any, success: number, fail: number): void {
-    console.log(response);
+    // console.log(response);
     let return_code = response['code'];
     if (return_code == success)
       this.setSuccess(response['message']);

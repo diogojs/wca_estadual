@@ -125,8 +125,11 @@ text-align: center;
         }
 }
 
-.updatedInfo{
-        margin-bottom: 1rem;
+#info {
+        margin-bottom: 2rem;
+        div {
+                margin-bottom: 0.5rem;
+        }
 }
 
 .alignSection{

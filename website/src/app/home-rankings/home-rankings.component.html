@@ -4,12 +4,18 @@
 <div id="alignTop">
     <h1>Ranking Estadual</h1>
 
-    <a routerLink="register" routerLinkActive="true">
-        Cadastrar competidor
-    </a>
+    <a routerLink="register" routerLinkActive="true">Cadastrar</a>
 </div>
 
-<div class="updatedInfo">Última Atualização: <i>{{ results['latest_update'] }}</i></div>
+<!--                        INFORMAÇÕES GERAIS                          -->
+<section id="info">
+    <h6>Notas:</h6>
+    <div class="generalInfo">Este é um ranking semi-oficial, utilizando os resultados públicos oficiais das competições da WCA,
+        porém adicionando um filtro não suportado no site da WCA (o Estado de cada competidor).
+    </div>
+    <div class="generalInfo">O ranking é atualizado <i>somente uma vez ao dia</i>. Se você já se cadastrou mas ainda não está aparecendo na tabela, aguarde até a próxima atualização (amanhã).</div>
+    <div id="updatedInfo">Última Atualização: <i>{{ results['latest_update'] }}</i></div>
+</section>
 
 <section class="cubingEvents">
     <h6>Modalidade</h6>

@@ -162,7 +162,12 @@ export class HomeRankingsComponent implements OnInit {
                         "id": "2022SOUZ13"
                     }
                 ],
-                "333fm": [],
+                "333fm": [
+                    {
+                        "id": "2013FORT01",
+                        "average": 4435
+                    }
+                ],
                 "333ft": [],
                 "333mbf": [],
                 "333oh": [
@@ -614,7 +619,7 @@ export class HomeRankingsComponent implements OnInit {
     this.resultsService.getResults().subscribe(
       (response: JSON) => {
         this.results = response;
-        console.log(response);
+        // console.log(response);
         this.updateFilteredResults();
       }
     )
@@ -658,10 +663,36 @@ export class HomeRankingsComponent implements OnInit {
   }
 
   viewResult(result: number): string {
-    if (this.currentEvent == "333fm")
-      return result.toString();
+    if (this.currentEvent == "333fm") {
+        if (this.currentKindOfResult == "single")
+            return result.toString();
+        else
+            return (result / 100).toFixed(2);
+    }
+    else if (this.currentEvent == "333mbf") {
+        let example = 940233800;
+        let encoded = example.toString();
+        if (encoded.length == 9) { // new format
+            let DD = parseInt(encoded.substring(0, 2));
+            let diff = 99 - DD;
+            let seconds = parseInt(encoded.substring(2, 7));
+            let missed = parseInt(encoded.substring(7));
+            let solved = diff + missed;
+            let attempted = solved + missed;
+            let minutes = this.convertToMinutes(seconds);
+            minutes = minutes.substring(0, minutes.length-3);
+            return `${solved}/${attempted} ${minutes}`
+        } else { // old format
+            let SS = parseInt(encoded.substring(1, 3));
+            let solved = 99 - SS;
+            let attempted = parseInt(encoded.substring(3, 5));
+            let seconds = parseInt(encoded.substring(5));
+            let minutes = this.convertToMinutes(seconds);
+            minutes = minutes.substring(0, minutes.length-3);
+            return `${solved}/${attempted} ${minutes}`
+        }
+    }
     
-    // TODO: handle MultiBLD cases
     let seconds = result / 100;
 
     if (seconds > 60) {

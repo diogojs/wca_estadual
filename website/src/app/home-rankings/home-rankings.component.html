@@ -39,7 +39,7 @@
     <section class="states">
         <h6>Estado</h6>
         <select #selectedState (change)="changeStateTo(selectedState.value)">
-            <option default> </option>
+            <option value="" default>Todos</option>
             <option *ngFor="let state of states" [value]="state.abbrev">{{ state.name }}</option>
         </select>
     </section>

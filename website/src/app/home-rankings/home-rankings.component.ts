@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Result } from '../data';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ResultsService } from '../services/results.service';
+import { environment } from '../../environments/environment';
 
 
 @Component({
@@ -87,11 +88,11 @@ export class HomeRankingsComponent implements OnInit {
             },
             "2023KLAP03": {
                 "name": "Ana Carolini Agostini Klappoth",
-                "state": "SC"
+                "state": "PR"
             },
             "2023MEND17": {
                 "name": "Artur Augusto Mendes",
-                "state": "SC"
+                "state": "PR"
             }
         },
         "results": {
@@ -418,6 +419,10 @@ export class HomeRankingsComponent implements OnInit {
                     {
                         "id": "2022SOUZ13",
                         "single": 940233800
+                    },
+                    {
+                        "id": "2013FORT01",
+                        "single": 810354401
                     }
                 ],
                 "333oh": [
@@ -614,15 +619,18 @@ export class HomeRankingsComponent implements OnInit {
         },
         "latest_update": "18/09/2024 07:05"
     }
-    // this.results = mock;
-    // this.updateFilteredResults();
-    this.resultsService.getResults().subscribe(
-      (response: JSON) => {
-        this.results = response;
-        // console.log(response);
+    if (environment['production']) {
+        this.resultsService.getResults().subscribe(
+            (response: JSON) => {
+              this.results = response;
+              // console.log(response);
+              this.updateFilteredResults();
+            }
+        )
+    } else {
+        this.results = mock;
         this.updateFilteredResults();
-      }
-    )
+    }
   }
 
   updateFilteredResults(): void {
@@ -670,8 +678,7 @@ export class HomeRankingsComponent implements OnInit {
             return (result / 100).toFixed(2);
     }
     else if (this.currentEvent == "333mbf") {
-        let example = 940233800;
-        let encoded = example.toString();
+        let encoded = result.toString();
         if (encoded.length == 9) { // new format
             let DD = parseInt(encoded.substring(0, 2));
             let diff = 99 - DD;
